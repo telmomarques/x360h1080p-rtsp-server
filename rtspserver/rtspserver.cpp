@@ -49,6 +49,22 @@ static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms,
 int main(int argc, char** argv) {
   json config;
   OutPacketBuffer::maxSize = 600000;
+  int opt;
+  char* mainstreamPipe = NULL;
+  char* substreamPipe = NULL;
+  
+  while ((opt = getopt (argc, argv, "m:s:")) != -1)
+  {
+	  switch(opt) {
+		  case 'm':
+			mainstreamPipe = optarg;
+		  break;
+		  
+		  case 's':
+			substreamPipe = optarg;
+		  break;
+	  }
+  }
   
   // Read configuration
   std::ifstream configFile("../config/config.json");
@@ -82,59 +98,50 @@ int main(int argc, char** argv) {
   char const* descriptionString = "";
   
   if(encodingType == EncodingType::H265) {
-	  // A H.265 video elementary stream:
-	  {
-		char const* streamName = "h265ESVideoTest";
-		char const* inputFileName = "stdin";
-		ServerMediaSession* sms
-		  = ServerMediaSession::createNew(*env, streamName, streamName,
-						  descriptionString);
-		sms->addSubsession(H265VideoFileServerMediaSubsession
-				   ::createNew(*env, inputFileName, reuseFirstSource));
+	if(mainstreamPipe != NULL) {
+		char const* streamName = "mainstream";
+		
+		ServerMediaSession* sms = ServerMediaSession::createNew(*env, streamName, streamName,descriptionString);
+		sms->addSubsession(H265VideoFileServerMediaSubsession::createNew(*env, mainstreamPipe, reuseFirstSource));
 		rtspServer->addServerMediaSession(sms);
-
-		announceStream(rtspServer, sms, streamName, inputFileName);
-	  }
+		announceStream(rtspServer, sms, streamName, mainstreamPipe);
+	}
+	
+	if(substreamPipe != NULL) {
+		char const* streamName = "substream";
+		
+		ServerMediaSession* sms = ServerMediaSession::createNew(*env, streamName, streamName,descriptionString);
+		sms->addSubsession(H265VideoFileServerMediaSubsession::createNew(*env, substreamPipe, reuseFirstSource));
+		rtspServer->addServerMediaSession(sms);
+		announceStream(rtspServer, sms, streamName, substreamPipe);
+	}
   }
   else {
-	  	  // Set up each of the possible streams that can be served by the
-	  // RTSP server.  Each such stream is implemented using a
-	  // "ServerMediaSession" object, plus one or more
-	  // "ServerMediaSubsession" objects for each audio/video substream.
-
-	  // A H.264 video elementary stream:
-	  {
-		char const* streamName = "h264ESVideoTest";
-		char const* inputFileName = "stdin";
-		ServerMediaSession* sms
-		  = ServerMediaSession::createNew(*env, streamName, streamName,
-						  descriptionString);
-		sms->addSubsession(H264VideoFileServerMediaSubsession
-				   ::createNew(*env, inputFileName, reuseFirstSource));
+	if(mainstreamPipe != NULL) {
+		char const* streamName = "mainstream";
+		
+		ServerMediaSession* sms = ServerMediaSession::createNew(*env, streamName, streamName, descriptionString);
+		sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(*env, mainstreamPipe, reuseFirstSource));
 		rtspServer->addServerMediaSession(sms);
-
-		announceStream(rtspServer, sms, streamName, inputFileName);
-	  }
+		announceStream(rtspServer, sms, streamName, mainstreamPipe);
+	}
+	
+	if(substreamPipe != NULL) {
+		char const* streamName = "substream";
+		
+		ServerMediaSession* sms = ServerMediaSession::createNew(*env, streamName, streamName, descriptionString);
+		sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(*env, substreamPipe, reuseFirstSource));
+		rtspServer->addServerMediaSession(sms);
+		announceStream(rtspServer, sms, streamName, substreamPipe);
+	}
   }
 
-/*
-  // Also, attempt to create a HTTP server for RTSP-over-HTTP tunneling.
-  // Try first with the default HTTP port (80), and then with the alternative HTTP
-  // port numbers (8000 and 8080).
-
-  if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
-    *env << "\n(We use port " << rtspServer->httpServerPortNum() << " for optional RTSP-over-HTTP tunneling.)\n";
-  } else {
-    *env << "\n(RTSP-over-HTTP tunneling is not available.)\n";
-  }
-*/
   env->taskScheduler().doEventLoop(); // does not return
 
   return 0; // only to prevent compiler warning
 }
 
-static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms,
-			   char const* streamName, char const* inputFileName) {
+static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms, char const* streamName, char const* inputFileName) {
   char* url = rtspServer->rtspURL(sms);
   UsageEnvironment& env = rtspServer->envir();
   env << "\n\"" << streamName << "\" stream, from the file \""
