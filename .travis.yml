@@ -1,5 +1,3 @@
 dist: xenial
 language: cpp
-arch:
-   - arm64
-script: make
+script: ./genMakefiles armlinux2 && make
