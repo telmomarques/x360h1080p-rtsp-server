@@ -1,5 +1,5 @@
 dist: bionic
 language: cpp
-# before_install:
-#   - sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-script: ./genMakefiles linux && make
+before_install:
+  - sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+script: ./genMakefiles armlinux2 && make
