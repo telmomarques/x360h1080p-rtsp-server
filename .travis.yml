@@ -3,5 +3,7 @@ language: cpp
 before_install:
   - |
     sudo dpkg --add-architecture armhf &&
+    sudo mv sources.list /etc/apt/sources.list &&
+    sudo apt-get update &&
     sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libssl-dev:armhf
 script: ./genMakefiles armlinux2 && make
