@@ -279,6 +279,7 @@ private:
   int openConnection(); // result values: -1: failure; 0: pending; 1: success
   char* createAuthenticatorString(char const* cmd, char const* url);
   char* createBlocksizeString(Boolean streamUsingTCP);
+  char* createKeyMgmtString(char const* url, MediaSubsession const& subsession);
   void handleRequestError(RequestRecord* request);
   Boolean parseResponseCode(char const* line, unsigned& responseCode, char const*& responseString);
   void handleIncomingRequest();

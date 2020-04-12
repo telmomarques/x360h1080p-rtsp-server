@@ -53,6 +53,8 @@ unsigned RTSPClient::sendSetupCommand(MediaSubsession& subsession, responseHandl
                                       Boolean streamOutgoing, Boolean streamUsingTCP, Boolean forceMulticastOnUnspecified,
 				      Authenticator* authenticator) {
   if (fTunnelOverHTTPPortNum != 0) streamUsingTCP = True; // RTSP-over-HTTP tunneling uses TCP (by definition)
+  // However, if we're using a TLS connection, streaming over TCP doesn't work, so disable it:
+  if (fTLS.isNeeded) streamUsingTCP = False;
   if (fCurrentAuthenticator < authenticator) fCurrentAuthenticator = *authenticator;
 
   u_int32_t booleanFlags = 0;
@@ -673,11 +675,13 @@ Boolean RTSPClient::setRequestFields(RequestRecord* request,
     constructSubsessionURL(subsession, prefix, separator, suffix);
     
     char const* transportFmt;
-    if (strcmp(subsession.protocolName(), "UDP") == 0) {
+    if (strcmp(subsession.protocolName(), "RTP") == 0) {
+      transportFmt = "Transport: RTP/AVP%s%s%s=%d-%d\r\n";
+    } else if (strcmp(subsession.protocolName(), "SRTP") == 0) {
+      transportFmt = "Transport: RTP/SAVP%s%s%s=%d-%d\r\n";
+    } else { // "UDP"
       suffix = "";
       transportFmt = "Transport: RAW/RAW/UDP%s%s%s=%d-%d\r\n";
-    } else {
-      transportFmt = "Transport: RTP/AVP%s%s%s=%d-%d\r\n";
     }
     
     cmdURL = new char[strlen(prefix) + strlen(separator) + strlen(suffix) + 1];
@@ -721,12 +725,15 @@ Boolean RTSPClient::setRequestFields(RequestRecord* request,
     // Optionally include a "Blocksize:" string:
     char* blocksizeStr = createBlocksizeString(streamUsingTCP);
 
-    // The "Transport:" and "Session:" (if present) and "Blocksize:" (if present) headers
-    // make up the 'extra headers':
-    extraHeaders = new char[transportSize + strlen(sessionStr) + strlen(blocksizeStr)];
+    // Optionally include a "KeyMgmt:" string:
+    char* keyMgmtStr = createKeyMgmtString(cmdURL, subsession);
+
+    // The "Transport:", "Session:" (if present), "Blocksize:" (if present), and "KeyMgmt:" (if present)
+    // headers make up the 'extra headers':
+    extraHeaders = new char[transportSize + strlen(sessionStr) + strlen(blocksizeStr) + strlen(keyMgmtStr) + 1];
     extraHeadersWereAllocated = True;
-    sprintf(extraHeaders, "%s%s%s", transportStr, sessionStr, blocksizeStr);
-    delete[] transportStr; delete[] sessionStr; delete[] blocksizeStr;
+    sprintf(extraHeaders, "%s%s%s%s", transportStr, sessionStr, blocksizeStr, keyMgmtStr);
+    delete[] transportStr; delete[] sessionStr; delete[] blocksizeStr; delete[] keyMgmtStr;
   } else if (strcmp(request->commandName(), "GET") == 0 || strcmp(request->commandName(), "POST") == 0) {
     // We will be sending a HTTP (not a RTSP) request.
     // Begin by re-parsing our RTSP URL, to get the stream name (which we'll use as our 'cmdURL'
@@ -991,6 +998,29 @@ char* RTSPClient::createBlocksizeString(Boolean streamUsingTCP) {
     blocksizeStr = strDup("");
   }
   return blocksizeStr;
+}
+
+char* RTSPClient::createKeyMgmtString(char const* url, MediaSubsession const& subsession) {
+  char* keyMgmtStr;
+  MIKEYState* mikeyState;
+  u_int8_t* mikeyMessage;
+  unsigned mikeyMessageSize;
+
+  if ((mikeyState = subsession.getMIKEYState()) == NULL ||
+      (mikeyMessage = mikeyState->generateMessage(mikeyMessageSize)) == NULL) {
+    keyMgmtStr = strDup("");
+  } else {
+    char const* keyMgmtFmt = "KeyMgmt: prot=mikey; uri=\"%s\"; data=\"%s\"\r\n";
+    char* base64EncodedData = base64Encode((char*)mikeyMessage, mikeyMessageSize);
+    unsigned keyMgmtSize = strlen(keyMgmtFmt)
+      + strlen(url) + strlen(base64EncodedData);
+    keyMgmtStr = new char[keyMgmtSize];
+    sprintf(keyMgmtStr, keyMgmtFmt,
+	    url, base64EncodedData);
+    delete[] base64EncodedData;
+  }
+
+  return keyMgmtStr;
 }
 
 void RTSPClient::handleRequestError(RequestRecord* request) {
@@ -1939,7 +1969,7 @@ int RTSPClient::write(const char* data, unsigned count) {
       if (fTLS.isNeeded) {
 	return fTLS.write(data, count);
       } else {
-	return send(fOutputSocketNum, (const u_int8_t*)data, count, 0);
+	return send(fOutputSocketNum, data, count, 0);
       }
 }
 
