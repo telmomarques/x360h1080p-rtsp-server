@@ -2,4 +2,4 @@ dist: bionic
 language: cpp
 before_install:
   - sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libssl-dev
-script: ./genMakefiles linux && make
+script: ./genMakefiles armlinux2 && make
