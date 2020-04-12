@@ -2,6 +2,6 @@ dist: bionic
 language: cpp
 before_install:
   - |
-    sudo dpkg --add-architecture armhf
-    sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libssl-dev:armhf
+    sudo dpkg --add-architecture armhf << EOF
+    sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libssl-dev:armhf << EOF
 script: ./genMakefiles armlinux2 && make
