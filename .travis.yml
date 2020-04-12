@@ -13,6 +13,8 @@ deploy:
     secure: XEy7plcLIUTwqzvUsKwM7bpPk+NVT2ms6no1gMaR36TT9scs9a9483cqLm5jl0NDmh5ckZqH590avLNWKckbrwGgrqe/kQElpEuEzeCFlrmNFJU+Gp+3J/zxGUhYA4IO2qKpN5ZILTQ3iq08nxZo11HmrNvet09ayK4fOkCZF8nHSyFUmD5gyBt7Tidn5VLuDwuJz6NsOuUv4IWplhe6jfVLlhA6tHMfk2Nahx/T9mZKpQSWS81L6gnI31z4J38U3fGGJKfbnA1nWryyPWBhsiXHSqD6G+L/OKPdxzEiv8kwlvo4bwGkdSGuZECYOJID7I1Ij4SMmSfZi9IPovdDPpBaY00QOI3fqdldF1lO1UfZHFzLZ1vRnx5pFANMVnYSHofces6hTXn9iOMGA7CN2M8D4oMGh55e/Q3PUYeonHzAquxjZcx8R0DZ5kwNtZT6CR2lH8y5QdWa0+0Oo85I8+AseTyA+XS9Kd1vF3NhBTB8z0smaG5vrSVkC8F0xhExwmTva83Agtq2Ffl8ZgBORgwCf/pIaAFgQCzuUlzRUdvQ4OhTQLbswjKxF+F5pKkccdhFX9AwtXhuiBkix/jDS8zRnIXAsxbrh4OEq6/VvQxqGc1X1imSCnng58n611bClHnLxSs8W4h/oUrwGHxxpTepoo3lZMfyjS0LjFPXFuc=
   file: rtspserver/rtspserver
   on:
+    tags: true
     repo: telmomarques/x360h1080p-rtsp-server
   skip_cleanup: true
-  draft: true
+  prerelease: true
+  
