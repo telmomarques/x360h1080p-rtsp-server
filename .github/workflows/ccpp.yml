@@ -2,9 +2,8 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -38,17 +37,16 @@ jobs:
 
     - name: Release (pre-release)
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/heads/master')
+      if: ${{ contains(github.ref, '-rc') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: rtspserver/rtspserver
         prerelease: true
-        tag_name: latest
         
     - name: Release (release)
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
+      if: ${{ !contains(github.ref, '-rc') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
