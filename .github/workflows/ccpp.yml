@@ -14,22 +14,30 @@ jobs:
     steps:
     - name: Checkout source code
       uses: actions/checkout@v2
+
     - name: Add ARM architecture to APT
       run: sudo dpkg --add-architecture armhf
+
     - name: Setup APT repositories for ARM
       run: sudo mv sources.list /etc/apt/sources.list
+
     - name: Update APT repositories
       run: sudo apt-get update
+
     - name: Install ARM cross compiler
       run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
     - name: Install dependencies
       run: sudo apt-get -y install libssl-dev:armhf
+
     - name: Generate mkefiles for ARM
       run: ./genMakefiles armlinux2
+
     - name: Compile
       run: make
+
     - name: Create release (release)
-      id: create-release
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,6 +45,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
         draft: true
+
     - name: Upload binary to release
       uses: actions/upload-release-asset@v1.0.0
       env:
