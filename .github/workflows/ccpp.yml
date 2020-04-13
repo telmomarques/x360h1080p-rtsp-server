@@ -12,18 +12,33 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout source
+      uses: actions/checkout@v2
+      
     - name: Add ARM architecture to APT
       run: sudo dpkg --add-architecture armhf
+      
     - name: Setup ARM repositories
       run: sudo mv sources.list /etc/apt/sources.list
+      
     - name: Update APT repositories
       run: sudo apt-get update
+      
     - name: Install ARM cross compiler
       run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+      
     - name: Install dependencies
       run: sudo apt-get -y install libssl-dev:armhf
+      
     - name: Generate Makefiles for ARM
       run: ./genMakefiles armlinux2
+      
     - name: Compile
       run: make
+      
+    - name: Create Release (release)
+    - uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: true
