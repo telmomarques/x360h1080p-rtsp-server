@@ -36,22 +36,12 @@ jobs:
     - name: Compile
       run: make
 
-    - name: Create release (release)
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Release (pre-release)
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/heads/master')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        draft: true
-
-    - name: Upload binary to release
-      uses: actions/upload-release-asset@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./rtspserver
-        asset_name: rtspserver
-        asset_content_type: application/octet-stream
+        files: rtspserver
+        prerelease: true
+        tag_name: latest
