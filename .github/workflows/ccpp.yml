@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install ARM cross compiler
+      run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
     - name: Generate Makefiles
       run: ./genMakefiles linux
-    - name: make
+    - name: Compile
       run: make
