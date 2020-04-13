@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - name: Checkout source
+    - name: Checkout source code
       uses: actions/checkout@v2
     - name: Add ARM architecture to APT
       run: sudo dpkg --add-architecture armhf
-    - name: Setup ARM repositories
+    - name: Setup APT repositories for ARM
       run: sudo mv sources.list /etc/apt/sources.list
     - name: Update APT repositories
       run: sudo apt-get update
@@ -24,13 +24,25 @@ jobs:
       run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
     - name: Install dependencies
       run: sudo apt-get -y install libssl-dev:armhf
-    - name: Generate Makefiles for ARM
+    - name: Generate mkefiles for ARM
       run: ./genMakefiles armlinux2
     - name: Compile
       run: make
-    - name: Create Release (release)
+    - name: Create release (release)
+      id: create-release
       uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
         draft: true
+    - name: Upload binary to release
+      uses: actions/upload-release-asset@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./rtspserver
+        asset_name: rtspserver
+        asset_content_type: application/octet-stream
