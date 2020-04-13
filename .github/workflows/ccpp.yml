@@ -42,6 +42,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: rtspserver
+        files: rtspserver/rtspserver
         prerelease: true
         tag_name: latest
