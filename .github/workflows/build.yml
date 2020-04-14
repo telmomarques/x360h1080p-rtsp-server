@@ -39,33 +39,37 @@ jobs:
 
     - name: Release (pre-release)
       if: ${{ env.isReleaseCandidate }}
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        files: rtspserver/rtspserver
+        token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
+        artifacts: rtspserver/rtspserver
         
     - name: Update latest-rc tag
       if: ${{ env.isReleaseCandidate }}
-      uses: EndBug/latest-tag@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag-name: latest-rc
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: latest-rc
+        allowUpdates: true
+        replacesArtifacts: true
+        prerelease: true
+        artifacts: rtspserver/rtspserver
 
-    - name: Release (release)
-      uses: softprops/action-gh-release@v1
+    - name: Release (final)
       if: ${{ !env.isReleaseCandidate }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        files: rtspserver/rtspserver
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: rtspserver/rtspserver
         
     - name: Update latest tag
-      if: ${{ !env.isReleaseCandidate }}
-      uses: EndBug/latest-tag@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ env.isReleaseCandidate }}
+      uses: ncipollo/release-action@v1
       with:
-        tag-name: latest
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: latest
+        allowUpdates: true
+        replacesArtifacts: true
+        prerelease: true
+        artifacts: rtspserver/rtspserver
