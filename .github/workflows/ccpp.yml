@@ -47,7 +47,7 @@ jobs:
         prerelease: true
         
     - name: Update latest-rc tag
-      if: isReleaseCandidate
+      if: ${{ env.isReleaseCandidate }}
       uses: EndBug/latest-tag@latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,14 +56,14 @@ jobs:
 
     - name: Release (release)
       uses: softprops/action-gh-release@v1
-      if: ${{ !isReleaseCandidate }}
+      if: ${{ !env.isReleaseCandidate }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: rtspserver/rtspserver
         
     - name: Update latest tag
-      if: ${{ !isReleaseCandidate }}
+      if: ${{ !env.isReleaseCandidate }}
       uses: EndBug/latest-tag@latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
