@@ -1,4 +1,6 @@
 name: C/C++ CI
+env:
+  isReleaseCandidate: ${{ contains(github.ref, '-rc') }}
 
 on:
   push:
@@ -29,25 +31,41 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get -y install libssl-dev:armhf
 
-    - name: Generate mkefiles for ARM
+    - name: Generate makefiles for ARM
       run: ./genMakefiles armlinux2
 
     - name: Compile
       run: make
 
     - name: Release (pre-release)
+      if: isReleaseCandidate
       uses: softprops/action-gh-release@v1
-      if: ${{ contains(github.ref, '-rc') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: rtspserver/rtspserver
         prerelease: true
         
+    - name: Update latest-rc tag
+      if: isReleaseCandidate
+      uses: EndBug/latest-tag@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag-name: latest-rc
+
     - name: Release (release)
       uses: softprops/action-gh-release@v1
-      if: ${{ !contains(github.ref, '-rc') }}
+      if: ${{ !isReleaseCandidate }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: rtspserver/rtspserver
+        
+    - name: Update latest tag
+      if: ${{ !isReleaseCandidate }}
+      uses: EndBug/latest-tag@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag-name: latest
