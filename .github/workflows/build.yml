@@ -64,7 +64,7 @@ jobs:
         artifacts: rtspserver/rtspserver
         
     - name: Update latest tag
-      if: ${{ env.isReleaseCandidate }}
+      if: ${{ !env.isReleaseCandidate }}
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
