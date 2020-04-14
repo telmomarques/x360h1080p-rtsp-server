@@ -1,6 +1,7 @@
 name: C/C++ CI
 env:
   isReleaseCandidate: ${{ contains(github.ref, '-rc') }}
+  isFinalRelease: ${{ !contains(github.ref, '-rc') }}
 
 on:
   push:
@@ -41,7 +42,7 @@ jobs:
       run: make
 
     - name: Release (pre-release)
-      if: ${{ env.isReleaseCandidate }}
+      if: env.isReleaseCandidate
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,7 +50,7 @@ jobs:
         artifacts: rtspserver/rtspserver
         
     - name: Update latest-rc tag
-      if: ${{ env.isReleaseCandidate }}
+      if: env.isReleaseCandidate
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -60,14 +61,14 @@ jobs:
         artifacts: rtspserver/rtspserver
 
     - name: Release (final)
-      if: ${{ !env.isReleaseCandidate }}
+      if: env.isFinalRelease
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: rtspserver/rtspserver
         
     - name: Update latest tag
-      if: ${{ !env.isReleaseCandidate }}
+      if: env.isFinalRelease
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
