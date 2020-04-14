@@ -2,6 +2,7 @@ name: C/C++ CI
 env:
   isReleaseCandidate: ${{ contains(github.ref, '-rc') }}
   isFinalRelease: ${{ !contains(github.ref, '-rc') }}
+  GITHUB_CONTEXT: ${{ toJson(github) }}
 
 on:
   push:
@@ -15,7 +16,7 @@ jobs:
 
     steps:
     - name: Debug var
-      run: "echo $isReleaseCandidate && echo $github.ref"
+      run: echo $isReleaseCandidate && echo $isFinalRelease && echo "$GITHUB_CONTEXT"
 
     - name: Checkout source code
       uses: actions/checkout@v2
