@@ -17,6 +17,12 @@ jobs:
     steps:
     - name: Debug var
       run: echo $isReleaseCandidate && echo $isFinalRelease && echo "$GITHUB_CONTEXT"
+    - name: RC
+      if: env.isReleaseCandidate
+      run: echo "RC"
+    - name: NON-RC
+      if: env.isFinalRelease
+      run: echo "FINAL"
 
 #    - name: Checkout source code
 #      uses: actions/checkout@v2
