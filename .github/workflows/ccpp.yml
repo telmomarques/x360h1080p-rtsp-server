@@ -38,7 +38,7 @@ jobs:
       run: make
 
     - name: Release (pre-release)
-      if: isReleaseCandidate
+      if: ${{ env.isReleaseCandidate }}
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
