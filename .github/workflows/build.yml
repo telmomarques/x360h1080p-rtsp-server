@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+    - name: Debug var
+      run: "echo $isReleaseCandidate && echo $github.ref"
+
     - name: Checkout source code
       uses: actions/checkout@v2
 
