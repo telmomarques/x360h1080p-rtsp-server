@@ -71,5 +71,4 @@ jobs:
         tag: latest
         allowUpdates: true
         replacesArtifacts: true
-        prerelease: true
         artifacts: rtspserver/rtspserver
