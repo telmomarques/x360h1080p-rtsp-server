@@ -1,7 +1,4 @@
 name: C/C++ CI
-env:
-  isReleaseCandidate: ${{ contains(github.ref, '-rc') }}
-  isFinalRelease: ${{ !contains(github.ref, '-rc') }}
 
 on:
   push:
@@ -9,6 +6,9 @@ on:
       - '*'
     tags:
       - '*'
+env:
+  isReleaseCandidate: ${{ contains(github.ref, 'tags') && contains(github.ref, '-rc') }}
+  isFinalRelease: ${{ contains(github.ref, 'tags') && !contains(github.ref, '-rc') }}
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
 
     - name: Dump GitHub context
       env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
+        GITHUB_CONTEXT: ${{ toJson(env) }}
       run: echo "$GITHUB_CONTEXT"
 
     # - name: Checkout source code
