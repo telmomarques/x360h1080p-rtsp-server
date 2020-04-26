@@ -46,34 +46,107 @@ enum EncodingType {
 static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms,
 			   char const* streamName, char const* inputFileName); // fwd
 
+bool fileExists(char* filePath) {
+  /*if(filePath != NULL) {
+    if (FILE *file = fopen(filePath, "r")) {
+      fclose(file);
+      return true;
+    }
+  }
+  
+  return false;*/
+
+  return true;
+}
+
+void validateArgs(char* configPath, char* mainstreamPipe, char* substreamPipe) {
+
+  if(!fileExists(configPath)) {
+    std::cout << "Configuration file does not exist.\n";
+    exit(2);
+  }
+
+  if(mainstreamPipe == NULL && substreamPipe == NULL) {
+    std::cout << "At least one stream (mainstream/substream) must be specified.\n";
+    exit(3);
+  }
+
+  if(mainstreamPipe != NULL && !fileExists(mainstreamPipe)) {
+    std::cout << "Mainstream input file does not exist.\n";
+    exit(4);
+  }
+
+  if(substreamPipe != NULL && !fileExists(substreamPipe)) {
+    std::cout << "Substream input file does not exist.\n";
+    exit(5);
+  }
+}
+
+void printUsage(char* binaryName) {
+  std::cout << "Usage: ";
+  std::cout << binaryName;
+  std::cout << " -c [CONFIG FILE] -m [MAINSTREAM FILE] -s [SUBSTREAM FILE]\n\n";
+
+  std::cout << "Config file: path to configuration file\n";
+  std::cout << "Mainstream file: mainstream input file\n";
+  std::cout << "Substream file: substream input file\n";
+}
+
 int main(int argc, char** argv) {
   json config;
   OutPacketBuffer::maxSize = 600000;
   int opt;
+  char* configPath = (char*)"config.json";
   char* mainstreamPipe = NULL;
   char* substreamPipe = NULL;
   
-  while ((opt = getopt (argc, argv, "m:s:")) != -1)
+  while ((opt = getopt (argc, argv, "m:s:c:h")) != -1)
   {
 	  switch(opt) {
+      case 'c':
+        configPath = optarg;
+      break;
+
 		  case 'm':
-			mainstreamPipe = optarg;
+			  mainstreamPipe = optarg;
 		  break;
 		  
 		  case 's':
-			substreamPipe = optarg;
+			  substreamPipe = optarg;
 		  break;
+
+      case 'h':
+      default:
+        printUsage(argv[0]);
+        exit(6);
+      break;
 	  }
   }
+
+  if(argc == 1) {
+    printUsage(argv[0]);
+    exit(6);
+  }
+
+  validateArgs(configPath, mainstreamPipe, substreamPipe);
   
   // Read configuration
-  std::ifstream configFile("../config/config.json");
+  std::ifstream configFile(configPath);
+  try {
   configFile >> config;
+  } catch(...) {
+    std::cout << "Invalid configuration file.\n";
+    exit(7);
+  }
   
   EncodingType encodingType = EncodingType::H265;
   if(config["encodingType"] == "h264") {
 	  encodingType = EncodingType::H264;
   }
+
+  std::cout << "Streaming encoding: ";
+  std::cout << config["encodingType"];
+  std::cout << "\n";
 
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
@@ -137,7 +210,6 @@ int main(int argc, char** argv) {
   }
 
   env->taskScheduler().doEventLoop(); // does not return
-
   return 0; // only to prevent compiler warning
 }
 

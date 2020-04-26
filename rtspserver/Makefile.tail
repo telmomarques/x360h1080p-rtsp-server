@@ -1,6 +1,5 @@
 ##### End of variables to change
-CONSOLE_LINK_OPTS := ${CONSOLE_LINK_OPTS} -static
-LIBS_FOR_CONSOLE_APPLICATION := ${LIBS_FOR_CONSOLE_APPLICATION} -lpthread -ldl
+CONSOLE_LINK_OPTS := ${CONSOLE_LINK_OPTS} -static-libstdc++
 
 RTSP_SERVER_APP=rtspserver$(EXE)
 
