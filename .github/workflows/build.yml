@@ -36,7 +36,7 @@ jobs:
       run: sudo apt-get -y install libssl-dev:armhf
 
     - name: Generate makefiles for ARM
-      run: ./genMakefiles armlinux2
+      run: ./genMakefiles armv7linux-no-openssl
 
     - name: Compile
       run: make
