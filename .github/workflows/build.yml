@@ -5,6 +5,8 @@ env:
 
 on:
   push:
+    branches:
+      - '*'
     tags:
       - '*'
 
@@ -15,62 +17,67 @@ jobs:
 
     steps:
 
-    - name: Checkout source code
-      uses: actions/checkout@v2
+    - name: Dump GitHub context
+      env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
 
-    - name: Add ARM architecture to APT
-      run: sudo dpkg --add-architecture armhf
+    # - name: Checkout source code
+    #   uses: actions/checkout@v2
 
-    - name: Setup APT repositories for ARM
-      run: sudo mv sources.list /etc/apt/sources.list
+    # - name: Add ARM architecture to APT
+    #   run: sudo dpkg --add-architecture armhf
 
-    - name: Update APT repositories
-      run: sudo apt-get update
+    # - name: Setup APT repositories for ARM
+    #   run: sudo mv sources.list /etc/apt/sources.list
 
-    - name: Install ARM cross compiler
-      run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+    # - name: Update APT repositories
+    #   run: sudo apt-get update
 
-    - name: Install dependencies
-      run: sudo apt-get -y install libssl-dev:armhf
+    # - name: Install ARM cross compiler
+    #   run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
-    - name: Generate makefiles for ARM
-      run: ./genMakefiles armlinux2
+    # - name: Install dependencies
+    #   run: sudo apt-get -y install libssl-dev:armhf
 
-    - name: Compile
-      run: make
+    # - name: Generate makefiles for ARM
+    #   run: ./genMakefiles armlinux2
 
-    - name: Release (pre-release)
-      if: env.isReleaseCandidate == 'true'
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        prerelease: true
-        artifacts: rtspserver/rtspserver
+    # - name: Compile
+    #   run: make
+
+    # - name: Release (pre-release)
+    #   if: env.isReleaseCandidate == 'true'
+    #   uses: ncipollo/release-action@v1
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     prerelease: true
+    #     artifacts: rtspserver/rtspserver
         
-    - name: Update latest-rc tag
-      if: env.isReleaseCandidate == 'true'
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: latest-rc
-        allowUpdates: true
-        replacesArtifacts: true
-        prerelease: true
-        artifacts: rtspserver/rtspserver
+    # - name: Update latest-rc tag
+    #   if: env.isReleaseCandidate == 'true'
+    #   uses: ncipollo/release-action@v1
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     tag: latest-rc
+    #     allowUpdates: true
+    #     replacesArtifacts: true
+    #     prerelease: true
+    #     artifacts: rtspserver/rtspserver
 
-    - name: Release (final)
-      if: env.isFinalRelease == 'true'
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: rtspserver/rtspserver
+    # - name: Release (final)
+    #   if: env.isFinalRelease == 'true'
+    #   uses: ncipollo/release-action@v1
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     artifacts: rtspserver/rtspserver
         
-    - name: Update latest tag
-      if: env.isFinalRelease == 'true'
-      uses: ncipollo/release-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: latest
-        allowUpdates: true
-        replacesArtifacts: true
-        artifacts: rtspserver/rtspserver
+    # - name: Update latest tag
+    #   if: env.isFinalRelease == 'true'
+    #   uses: ncipollo/release-action@v1
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     tag: latest
+    #     allowUpdates: true
+    #     replacesArtifacts: true
+    #     artifacts: rtspserver/rtspserver
