@@ -29,23 +29,49 @@ jobs:
     - name: Update APT repositories
       run: sudo apt-get update
 
-    - name: Install ARM cross compiler
+    - name: Install libc ARM cross compiler
       run: sudo apt-get -y install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
+    - name: Get uClibc toolchain
+      uses: i3h/download-release-asset@v1
+      with:
+        owner: telmomarques
+        repo: uClibc-toolchain
+        tag: latest
+        file: toolchain.tar
+
+    - name: Install uClibc ARM cross compiler
+      run: tar -xf toolchain.tar
 
     - name: Install dependencies
       run: sudo apt-get -y install libssl-dev:armhf
 
-    - name: Generate makefiles for ARM
+    - name: Generate makefiles for libc ARM
       run: ./genMakefiles armv7linux-no-openssl
 
-    - name: Compile
+    - name: Compile libc
       run: make
+
+    - name: Copy libc executable
+      run: cd rtspserver && mkdir -p bin/libc && cp rtsperver bin/libc/
+
+    - name: Generate makefiles for uClibc ARM
+      run: ./genMakefiles armv7linux-uclibc-no-openssl
+
+    - name: Compile uClibc
+      run: make
+
+    - name: Copy uClibc executable
+      run: cd rtspserver && mkdir -p bin/uclibc && cp rtsperver bin/uclibc/
+
+    - name: Package binaries
+      run: cd rtspserver/bin && tar -cvf rtspserver.tar *
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v1
       with:
         name: rtpserver
-        path: rtspserver/rtspserver
+        path: rtspserver/rtspserver.tar
 
     - name: Release (pre-release)
       if: env.isReleaseCandidate == 'true'
@@ -53,7 +79,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-        artifacts: rtspserver/rtspserver
+        artifacts: rtspserver/rtspserver.tar
         
     - name: Update latest-rc tag
       if: env.isReleaseCandidate == 'true'
@@ -64,14 +90,14 @@ jobs:
         allowUpdates: true
         replacesArtifacts: true
         prerelease: true
-        artifacts: rtspserver/rtspserver
+        artifacts: rtspserver/rtspserver.tar
 
     - name: Release (final)
       if: env.isFinalRelease == 'true'
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: rtspserver/rtspserver
+        artifacts: rtspserver/rtspserver.tar
         
     - name: Update latest tag
       if: env.isFinalRelease == 'true'
@@ -81,4 +107,4 @@ jobs:
         tag: latest
         allowUpdates: true
         replacesArtifacts: true
-        artifacts: rtspserver/rtspserver
+        artifacts: rtspserver/rtspserver.tar
