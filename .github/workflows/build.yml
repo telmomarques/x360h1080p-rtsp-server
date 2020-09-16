@@ -71,7 +71,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: rtpserver
-        path: rtspserver/rtspserver.tar
+        path: rtspserver/bin/rtspserver.tar
 
     - name: Release (pre-release)
       if: env.isReleaseCandidate == 'true'
@@ -79,7 +79,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         prerelease: true
-        artifacts: rtspserver/rtspserver.tar
+        artifacts: rtspserver/bin/rtspserver.tar
         
     - name: Update latest-rc tag
       if: env.isReleaseCandidate == 'true'
@@ -90,7 +90,7 @@ jobs:
         allowUpdates: true
         replacesArtifacts: true
         prerelease: true
-        artifacts: rtspserver/rtspserver.tar
+        artifacts: rtspserver/bin/rtspserver.tar
 
     - name: Release (final)
       if: env.isFinalRelease == 'true'
@@ -107,4 +107,4 @@ jobs:
         tag: latest
         allowUpdates: true
         replacesArtifacts: true
-        artifacts: rtspserver/rtspserver.tar
+        artifacts: rtspserver/bin/rtspserver.tar
