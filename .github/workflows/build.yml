@@ -53,16 +53,16 @@ jobs:
       run: make
 
     - name: Copy libc executable
-      run: cd rtspserver && mkdir -p bin/libc && cp rtsperver bin/libc/
+      run: cd rtspserver && mkdir -p bin/libc && cp rtspserver bin/libc/
 
     - name: Generate makefiles for uClibc ARM
-      run: ./genMakefiles armv7linux-uclibc-no-openssl
+      run: make clean && make distclean && ./genMakefiles armv7linux-uclibc-no-openssl
 
     - name: Compile uClibc
       run: make
 
     - name: Copy uClibc executable
-      run: cd rtspserver && mkdir -p bin/uclibc && cp rtsperver bin/uclibc/
+      run: cd rtspserver && mkdir -p bin/uclibc && cp rtspserver bin/uclibc/
 
     - name: Package binaries
       run: cd rtspserver/bin && tar -cvf rtspserver.tar *
