@@ -3,3 +3,4 @@
 .vscode
 Makefile
 Makefile*
+rtspserver/rtspserver
